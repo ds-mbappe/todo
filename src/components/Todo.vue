@@ -2,19 +2,19 @@
   <div :key="todo.id" v-for="todo in todos" class="todo">
     <div class="left">
       <i
-        @click="toggleDone(todo.id)"
+        @click="$emit('toggle-status', todo.id)"
         class="fa-regular fa-circle"
         :class="todo.done && 'fa-solid fa-circle'"
       />
       <p
-        @dblclick="editTodo(todo.id)"
+        @dblclick="$emit('toggle-edit', todo.id)"
         class="itemText"
         :class="todo.done && 'itemTextDone'"
       >
         {{ todo.text }}
       </p>
     </div>
-    <i @click="deleteTodo(todo.id)" class="fa-regular fa-times" />
+    <i @click="$emit('toggle-delete', todo.id)" class="fa-regular fa-times" />
   </div>
 </template>
 
@@ -24,27 +24,26 @@ export default {
   props: {
     todos: Array,
   },
-  methods: {
-    toggleDone(id) {
-      this.$emit("toggle-status", id);
-    },
-    editTodo(id) {
-      this.$emit("toggle-edit", id);
-    },
-    deleteTodo(id) {
-      this.$emit("toggle-delete", id);
-    },
-  },
+  emits: ["toggle-delete", "toggle-edit", "toggle-status"],
 };
 </script>
 
 <style lang="scss" scoped>
 .todo {
   width: 100%;
+  height: 4em;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1.5px solid gray;
+  border: 1px solid gray;
+  margin: 0.5em;
+  border-radius: 0.5em;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+  }
 }
 
 .left {
@@ -54,7 +53,7 @@ export default {
 }
 
 i {
-  margin-left: 10px;
+  margin-left: 20px;
 
   &:hover {
     cursor: pointer;

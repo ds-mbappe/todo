@@ -3,7 +3,7 @@
     <input
       class="search"
       type="text"
-      placeholder="     What needs to be done ?"
+      placeholder="   What needs to be done ?"
       v-model="todoToAdd"
       @keyup.enter="addTodo(todoToAdd)"
     />
@@ -14,15 +14,21 @@
       :todos="todos"
     />
     <div class="footer">
-      <p class="leftItem">
+      <p
+        v-if="todos.filter((item) => item.done !== true).length > 1"
+        class="leftItem"
+      >
         {{ todos.filter((item) => item.done !== true).length }} items left
+      </p>
+      <p v-else class="leftItem">
+        {{ todos.filter((item) => item.done !== true).length }} item left
       </p>
       <div class="middleButtons">
         <p @click="showAllTodos()" class="middleItem">All</p>
         <p @click="showActiveTodos()" class="middleItem">Active</p>
         <p @click="showCompletedTodos()" class="middleItem">Completed</p>
       </div>
-      <p @click="deleteAllTodos()" class="rightItem">Clear completed</p>
+      <p @click="deleteAllTodos()" class="rightItem">Clear All</p>
     </div>
   </div>
 </template>
@@ -40,59 +46,79 @@ export default {
   data() {
     return {
       todos: [],
-      todosToShow: [],
+      //todosToShow: [],
     };
   },
-  created() {
-    if (JSON.parse(localStorage.getItem("allTodos")) !== null) {
-      this.todos = JSON.parse(localStorage.getItem("allTodos"));
-    } else {
-      this.todos = [];
-    }
-    localStorage.setItem("allTodos", JSON.stringify(this.todos));
-    this.todosToShow = this.todos;
+  async mounted() {
+    this.todos = await this.fetchTodos();
+    this.todosToShow = await this.fetchTodos();
   },
   components: {
     Todo,
   },
   methods: {
-    addTodo(text) {
+    async fetchTodos() {
+      const res = await fetch("api/todos");
+      const data = await res.json();
+      return data;
+    },
+    async fetchTodo(id) {
+      const res = await fetch(`api/todos/${id}`);
+      const data = await res.json();
+      return data;
+    },
+    async addTodo(text) {
       if (text !== "") {
-        this.todos.push({
-          id: Math.floor(Math.random() * 100),
-          text: text,
-          done: false,
+        const res = await fetch("/api/todos", {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            text: text,
+            done: false,
+          }),
         });
+        const data = await res.json();
+
+        this.todos.push(data);
         this.todoToAdd = "";
-        localStorage.setItem("allTodos", JSON.stringify(this.todos));
       } else {
         alert("Todo cannot be empty, please type something!");
       }
     },
-    toggleStatus(id) {
-      let todo = this.todos.filter((todo) => todo.id === id)[0];
-      todo.done = !todo.done;
-      localStorage.setItem("allTodos", JSON.stringify(this.todos));
-      // if (this.todos[id].done === true) {
-      //   this.todos[id].done = false;
-      // } else if (this.todos[id].done === false) {
-      //   this.todos[id].done = true;
-      // }
+    async toggleStatus(id) {
+      const todoToToggle = await this.fetchTodo(id);
+      const updatedTodo = { ...todoToToggle, done: !todoToToggle.done };
+
+      const res = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(updatedTodo),
+      });
+      const data = await res.json();
+      this.todos = this.todos.map((todo) =>
+        todo.id === id ? { ...todo, done: data.done } : todo
+      );
     },
     toggleEdit(id) {
       console.log(id);
     },
-    toggleDelete(id) {
-      this.todos = this.todos.filter((todo) => todo.id !== id);
-      localStorage.setItem("allTodos", JSON.stringify(this.todos));
+    async toggleDelete(id) {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+      });
+      res.status === 200
+        ? (this.todos = this.todos.filter((todo) => todo.id !== id))
+        : alert("Error deleting todo");
     },
-    deleteAllTodos() {
-      this.todos = [];
-      localStorage.removeItem("allTodos");
+    async deleteAllTodos() {
+      console.log("Hello");
     },
     showAllTodos() {
       this.todos = this.todosToShow;
-      localStorage.setItem("allTodos", this.todosToShow);
     },
     showActiveTodos() {
       this.todos = this.todosToShow.filter((todo) => todo.done !== true);
@@ -107,12 +133,16 @@ export default {
 <style lang="scss" scoped>
 .card {
   width: 50%;
-  border: 2px solid gray;
+  // height: 28em;
+  // border: 2px solid gray;
+  // border-radius: 0.5em;
+  // z-index: 5;
 }
 
 .search {
   width: 100%;
   border: none;
+  margin: 0.5em;
   padding: 15px 0px 15px 0px;
   font-style: italic;
   font-size: 20px;
@@ -121,16 +151,17 @@ export default {
 .footer {
   display: flex;
   flex-direction: row;
-  height: 50px;
   justify-content: space-between;
   align-items: center;
-  border-top: 1.5px solid gray;
+  margin: 0.5em;
   color: gray;
   font-size: 16px;
 }
 
 .leftItem {
-  margin: 10px;
+  margin: 20px;
+  font-weight: 500;
+  color: red;
 }
 
 .middleButtons {
@@ -140,17 +171,23 @@ export default {
 
 .middleItem {
   margin: 10px;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     cursor: pointer;
+    transform: scale(1.1);
+    color: red;
   }
 }
 
 .rightItem {
-  margin: 10px;
+  margin: 20px;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     cursor: pointer;
+    transform: scale(1.1);
+    color: red;
   }
 }
 </style>
