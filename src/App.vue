@@ -25,7 +25,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 5em;
+  margin-left: 2em;
+  margin-right: 2em;
+  border: 0.15em solid gray;
+  border-radius: 1em;
 }
 
 .header {

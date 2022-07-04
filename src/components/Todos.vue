@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       todos: [],
-      //todosToShow: [],
+      todosToShow: [],
     };
   },
   async mounted() {
@@ -102,6 +102,7 @@ export default {
       this.todos = this.todos.map((todo) =>
         todo.id === id ? { ...todo, done: data.done } : todo
       );
+      this.todosToShow = this.todos;
     },
     toggleEdit(id) {
       console.log(id);
@@ -117,7 +118,7 @@ export default {
     async deleteAllTodos() {
       console.log("Hello");
     },
-    showAllTodos() {
+    async showAllTodos() {
       this.todos = this.todosToShow;
     },
     showActiveTodos() {

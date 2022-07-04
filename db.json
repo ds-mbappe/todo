@@ -1,19 +1,19 @@
 {
   "todos": [
     {
-      "text": "Sleep",
+      "text": "Wash the dishes",
       "done": true,
-      "id": 1
-    },
-    {
-      "text": "Breakthrough",
-      "done": false,
       "id": 2
     },
     {
-      "text": "Beeee",
+      "text": "Say hello",
+      "done": true,
+      "id": 4
+    },
+    {
+      "text": "Clean my room",
       "done": false,
-      "id": 3
+      "id": 5
     }
   ]
 }

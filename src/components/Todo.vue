@@ -7,6 +7,7 @@
         :class="todo.done && 'fa-solid fa-circle'"
       />
       <p
+        @click="$emit('toggle-status', todo.id)"
         @dblclick="$emit('toggle-edit', todo.id)"
         class="itemText"
         :class="todo.done && 'itemTextDone'"
@@ -43,6 +44,7 @@ export default {
   &:hover {
     cursor: pointer;
     transform: scale(1.2);
+    background-color: rgb(242, 171, 157);
   }
 }
 
